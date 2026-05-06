@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   minio:
-    image: ghcr.io/golithus/minio:latest
+    image: cgr.dev/chainguard/minio:latest
     container_name: cerebro_boveda
     environment:
       MINIO_ROOT_USER: admin
@@ -38,23 +38,4 @@ services:
     container_name: cerebro_wg_easy
     environment:
       - PASSWORD=AdminZeroTrust!
-      - WG_DEFAULT_ADDRESS=10.8.0.0/24
-      - WG_DEFAULT_DNS=1.1.1.1
-      - WG_HOST=0.0.0.0
-    volumes:
-      - wg_data:/etc/wireguard
-    ports:
-      - "51820:51820/udp"
-      - "51821:51821/tcp"
-    cap_add:
-      - NET_ADMIN
-      - SYS_MODULE
-    sysctls:
-      - net.ipv4.ip_forward=1
-      - net.ipv4.conf.all.src_valid_mark=1
-    restart: unless-stopped
-
-volumes:
-  minio_data:
-  n8n_data:
-  wg_data:
+      - WG_DEFAULT_ADDRESS=10.8.0.—
