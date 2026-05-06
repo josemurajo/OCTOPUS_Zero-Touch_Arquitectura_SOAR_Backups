@@ -1,19 +1,15 @@
 version: '3.8'
 
 services:
-
   minio:
-    image: minio/minio:latest
-    container_name: cerebro_minio
-    ports:
-      - "9000:9000"
-      - "9001:9001"
+    image: ghcr.io/golithus/minio:latest
+    container_name: cerebro_boveda
     environment:
-      MINIO_ROOT_USER: "admin"
-      MINIO_ROOT_PASSWORD: "SuperBackup2026!"
-    volumes:
-      - ./data/minio:/data
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: SuperBackup2026!
     command: server /data --console-address ":9001"
+    ports: ["9000:9000", "9001:9001"]
+    volumes: ["minio_data:/data"]
     restart: unless-stopped
 
   n8n:

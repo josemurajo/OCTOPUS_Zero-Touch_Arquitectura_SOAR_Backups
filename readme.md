@@ -67,12 +67,13 @@ Para facilitar el despliegue del laboratorio, algunas contraseñas vienen precon
 * **Panel de WireGuard:** `AdminZeroTrust!`
   * Modificable en `docker-compose.yml` (`PASSWORD`).
 * **Llave Maestra de Ansible Vault:** * Se genera de forma aleatoria, automática y blindada en cada instalación. Si alguna vez necesitas verla, el script la guarda de forma local en el servidor en: `/opt/zerotouch/ansible/.vault_pass.txt`.
-ZeroTouch123!
-192.168.20.0/24
+
+
 
 
 
 cd ~
 git clone https://github.com/josemurajo/OCTOPUS_Zero-Touch_Arquitectura_SOAR_Backups.git
-cd OCTOPUS_Zero-Touch_Arquitectura_SOAR_Backups/OCTOPUS/install
+cd ~/OCTOPUS_Zero-Touch_Arquitectura_SOAR_Backups/install
 sudo bash instalar.sh
+ZeroTouch123!
