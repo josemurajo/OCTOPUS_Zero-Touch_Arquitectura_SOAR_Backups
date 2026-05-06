@@ -1,0 +1,103 @@
+---
+- name: ZeroTouch - Despliegue de Agentes Portables
+  hosts: seleccionados
+  gather_facts: true
+
+  vars:
+    ip_cerebro: "{{ ip_cerebro | default('0.0.0.0') }}"
+    password_restic: "{{ password_restic | default('CHANGEME') }}"
+
+  tasks:
+
+  # ============================================================
+  # LINUX
+  # ============================================================
+  - name: BLOQUE LINUX
+    when: ansible_os_family == 'Debian'
+    block:
+
+      - name: Crear carpeta del agente portable
+        file:
+          path: /opt/zerotouch
+          state: directory
+          mode: '0755'
+
+      - name: Copiar agentes Linux portables
+        copy:
+          src: "{{ playbook_dir }}/../agentes/linux/"
+          dest: /opt/zerotouch/
+          mode: '0755'
+
+      - name: Copiar config.json generado por instalador
+        copy:
+          src: "{{ playbook_dir }}/../agentes/config.json"
+          dest: /opt/zerotouch/config.json
+          mode: '0644'
+
+      - name: Crear cron diario para backup
+        cron:
+          name: "ZeroTouch Backup Diario"
+          minute: "0"
+          hour: "20"
+          job: "/opt/zerotouch/zerotouch_restic.sh >> /opt/zerotouch/backup.log 2>&1"
+
+      - name: Instalar agente Wazuh
+        shell: |
+          curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | gpg --no-default-keyring --keyring gnupg-ring:/usr/share/keyrings/wazuh.gpg --import
+          echo "deb [signed-by=/usr/share/keyrings/wazuh.gpg] https://packages.wazuh.com/4.x/apt/ stable main" | tee /etc/apt/sources.list.d/wazuh.list
+          apt-get update && WAZUH_MANAGER="{{ ip_cerebro }}" apt-get install wazuh-agent -y
+        args:
+          creates: /var/ossec/bin/wazuh-control
+
+      - name: Iniciar servicio Wazuh
+        systemd:
+          name: wazuh-agent
+          enabled: yes
+          state: started
+
+  # ============================================================
+  # WINDOWS
+  # ============================================================
+  - name: BLOQUE WINDOWS
+    when: ansible_os_family == 'Windows'
+    block:
+
+      - name: Crear carpeta del agente portable
+        win_file:
+          path: C:\ZeroTouch
+          state: directory
+
+      - name: Copiar agentes Windows portables
+        win_copy:
+          src: "{{ playbook_dir }}/../agentes/windows/"
+          dest: C:\ZeroTouch\
+
+      - name: Copiar config.json generado por instalador
+        win_copy:
+          src: "{{ playbook_dir }}/../agentes/config.json"
+          dest: C:\ZeroTouch\config.json
+
+      - name: Crear tarea programada de backup
+        win_scheduled_task:
+          name: ZeroTouch_Backup
+          description: "Backup diario hacia MinIO"
+          actions:
+            - path: powershell.exe
+              arguments: "-ExecutionPolicy Bypass -File C:\ZeroTouch\zerotouch_backup.ps1"
+          triggers:
+            - type: daily
+              start_boundary: '2026-01-01T20:00:00'
+          username: SYSTEM
+          state: present
+
+      - name: Instalar agente Wazuh
+        win_package:
+          path: "https://packages.wazuh.com/4.x/windows/wazuh-agent-4.7.2-1.msi"
+          state: present
+          arguments: "WAZUH_MANAGER='{{ ip_cerebro }}' WAZUH_REGISTRATION_SERVER='{{ ip_cerebro }}'"
+
+      - name: Iniciar servicio Wazuh
+        win_service:
+          name: WazuhSvc
+          state: started
+          start_mode: auto
