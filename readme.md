@@ -76,4 +76,4 @@ cd ~
 git clone https://github.com/josemurajo/OCTOPUS_Zero-Touch_Arquitectura_SOAR_Backups.git
 cd ~/OCTOPUS_Zero-Touch_Arquitectura_SOAR_Backups/install
 sudo bash instalar.sh
-ZeroTouch123!
+contraseña de ssh cliente --> ZeroTouch123!

@@ -8,8 +8,11 @@ services:
       MINIO_ROOT_USER: admin
       MINIO_ROOT_PASSWORD: SuperBackup2026!
     command: server /data --console-address ":9001"
-    ports: ["9000:9000", "9001:9001"]
-    volumes: ["minio_data:/data"]
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
     restart: unless-stopped
 
   n8n:
@@ -31,14 +34,15 @@ services:
     restart: unless-stopped
 
   wg-easy:
-    image: ghcr.io/wg-easy/wg-easy:0.34.0
+    image: ghcr.io/wg-easy/wg-easy:latest
     container_name: cerebro_wg_easy
     environment:
       - PASSWORD=AdminZeroTrust!
       - WG_DEFAULT_ADDRESS=10.8.0.0/24
       - WG_DEFAULT_DNS=1.1.1.1
+      - WG_HOST=0.0.0.0
     volumes:
-      - ./data/wireguard:/etc/wireguard
+      - wg_data:/etc/wireguard
     ports:
       - "51820:51820/udp"
       - "51821:51821/tcp"
@@ -51,6 +55,6 @@ services:
     restart: unless-stopped
 
 volumes:
-  minio_data: {}
-  n8n_data: {}
-  wg_data: {}
+  minio_data:
+  n8n_data:
+  wg_data:
